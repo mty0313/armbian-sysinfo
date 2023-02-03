@@ -1,5 +1,7 @@
 package top.mty.controller;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/sys")
+@Slf4j
 public class SysController {
 
   @GetMapping("/info")
@@ -25,9 +28,10 @@ public class SysController {
     List<String> commandResult;
     try {
       List<String> commands = new ArrayList<>();
-      commands.add("cd src/main/resources/scripts/");
+      commands.add("cd ~/scripts");
       commands.add("./armbian-sysinfo");
       commandResult = execute(commands);
+      log.debug(arrayToString(commandResult));
       ArmbianSysInfo sysInfo = new ArmbianSysInfo();
       for (String r : commandResult) {
         String[] split = r.split(":");
@@ -80,10 +84,7 @@ public class SysController {
     if (!StringUtils.hasText(value)) {
       return true;
     }
-    if (value.equals("°C") || value.equals("%")) {
-      return true;
-    }
-    return false;
+    return value.equals("°C") || value.equals("%");
   }
 
 
@@ -106,6 +107,17 @@ public class SysController {
     out.close();
     proc.destroy();
     return result;
+  }
+
+  public String arrayToString(List<String> array) {
+    if (CollectionUtils.isEmpty(array)) {
+      return "Empty Array";
+    }
+    StringBuilder r = new StringBuilder();
+    for (String s : array) {
+      r.append(s).append(";");
+    }
+    return r.toString();
   }
 
 }
