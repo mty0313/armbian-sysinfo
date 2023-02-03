@@ -123,11 +123,13 @@ swap_usage=$( (awk '/Swap/ { printf("%3.0f", $3/$2*100) }' <<<${swap_info} 2>/de
 swap_total=$(awk '{print $(2)}' <<<${swap_info})
 
 # display info
-display "System load" "${load%% *}" "${critical_load}" "0" "%" ""
+# display "System load" "${load%% *}" "${critical_load}" "0" "%" ""
+echo "systemLoad:"$load"%"
 
-printf "Up time:       \x1B[92m%s\x1B[0m\t" "$time"
-display "Local users" "${users##* }" "3" "2" ""
-echo "" # fixed newline
+# printf "Up time:       \x1B[92m%s\x1B[0m\t" "$time"
+echo "uptime:"$time
+# display "Local users" "${users##* }" "3" "2" ""
+# echo "" # fixed newline
 if [[ ${memory_total} -gt 1000 ]]; then
 	memory_total=$(awk '{printf("%.2f",$1/1024)}' <<<${memory_total})"G"
 else
@@ -140,19 +142,24 @@ else
 	swap_total+="M"
 fi
 
-display "Memory usage" "$memory_usage" "70" "0" "%" " of ${memory_total}"
-display "Zram usage" "$swap_usage" "75" "0" "%" " of ${swap_total}"
-printf "IP:	       "
-printf "\x1B[92m%s\x1B[0m" "$ip_address"
-echo "" # fixed newline
-display "CPU temp" "$board_temp" $CPU_TEMP_LIMIT "0" "°C" ""
-display "Ambient temp" "$amb_temp" $AMB_TEMP_LIMIT "0" "°C" ""
-display "Usage of /" "$root_usage" "90" "1" "%" " of $root_total"
-echo "" # fixed newline
+# display "Memory usage" "$memory_usage" "70" "0" "%" " of ${memory_total}"
+echo "ram:"$memory_usage"%"
+# display "Zram usage" "$swap_usage" "75" "0" "%" " of ${swap_total}"
+echo "zram:"$swap_usage"%"
+# printf "IP:	       "
+# printf "\x1B[92m%s\x1B[0m" "$ip_address"
+echo "ip:"$ip_address
+# echo "" # fixed newline
+# display "CPU temp" "$board_temp" $CPU_TEMP_LIMIT "0" "°C" ""
+echo "cpuTemp:"$board_temp"°C"
+# display "Ambient temp" "$amb_temp" $AMB_TEMP_LIMIT "0" "°C" ""
+# display "Usage of /" "$root_usage" "90" "1" "%" " of $root_total"
+echo "rootUsage:""$root_usage""%"
+# echo "" # fixed newline
 a=0
-display "storage/" "$storage_usage" "90" "1" "%" " of $storage_total" ; a=$((a+$?))
-display "storage temp" "$storage_temp" $HDD_TEMP_LIMIT "0" "°C" "" ; a=$((a+$?))
-display "Battery" "$battery_percent" "20" "1" "%" "$status_battery_text" ; a=$((a+$?))
+# display "storage/" "$storage_usage" "90" "1" "%" " of $storage_total" ; a=$((a+$?))
+# display "storage temp" "$storage_temp" $HDD_TEMP_LIMIT "0" "°C" "" ; a=$((a+$?))
+# display "Battery" "$battery_percent" "20" "1" "%" "$status_battery_text" ; a=$((a+$?))
 (( $a > 0 )) && echo "" # new line only if some value is displayed
 
 # Check whether PRIMARY_INTERFACE exist in /var/lib/vnstat/
@@ -202,4 +209,4 @@ if [[ $(command -v zpool) ]]; then
 	fi
 fi
 [[ $line -ne 0 ]] && echo ""
-echo ""
+# echo ""
