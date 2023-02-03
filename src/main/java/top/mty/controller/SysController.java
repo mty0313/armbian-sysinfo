@@ -1,9 +1,11 @@
 package top.mty.controller;
 
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import top.mty.common.R;
+import top.mty.controller.param.ArmbianSysInfo;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -12,7 +14,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -20,17 +21,69 @@ import java.util.List;
 public class SysController {
 
   @GetMapping("/info")
-  public R<List<String>> sysInfo() {
-    List<String> commandResult = new ArrayList<>();
+  public R<ArmbianSysInfo> sysInfo() {
+    List<String> commandResult;
     try {
       List<String> commands = new ArrayList<>();
       commands.add("cd src/main/resources/scripts/");
       commands.add("./armbian-sysinfo");
       commandResult = execute(commands);
-      return R.success(commandResult);
+      ArmbianSysInfo sysInfo = new ArmbianSysInfo();
+      for (String r : commandResult) {
+        String[] split = r.split(":");
+        if (split.length < 2) {
+          continue;
+        }
+        String key = r.split(":")[0];
+        String value = r.split(":")[1];
+        if (noUsefulValue(value)) {
+          continue;
+        }
+        if (StringUtils.hasText(key) && StringUtils.hasText(value)) {
+          switch (key) {
+            case ArmbianSysInfo.SYSTEM_LOAD:
+              sysInfo.setSystemLoad(value);
+              break;
+            case ArmbianSysInfo.IP:
+              sysInfo.setIp(value);
+              break;
+            case ArmbianSysInfo.CPU_TEMP:
+              sysInfo.setCpuTemp(value);
+              break;
+            case ArmbianSysInfo.RAM:
+              sysInfo.setRam(value);
+              break;
+            case ArmbianSysInfo.ZRAM:
+              sysInfo.setZram(value);
+              break;
+            case ArmbianSysInfo.ROOT_USAGE:
+              sysInfo.setRootUsage(value);
+              break;
+            case ArmbianSysInfo.UPTIME:
+              sysInfo.setUptime(value + " hours");
+              break;
+          }
+        }
+      }
+      return R.success(sysInfo);
     } catch (Exception e) {
-      return R.error(e.getMessage());
+      return R.error(e.toString());
     }
+  }
+
+  /**
+   * 判断是否无值
+   * @param value 值
+   * @return bool
+   */
+  public boolean noUsefulValue(String value) {
+    if (!StringUtils.hasText(value)) {
+      return true;
+    }
+    if (value.equals("°C") || value.equals("%")) {
+      return true;
+    }
+    return false;
   }
 
 
