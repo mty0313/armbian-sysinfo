@@ -1,6 +1,6 @@
 #!/usr/bin/zsh
 git checkout main
-git pull origin/main
+git pull origin main
 mvn package -Dmaven.test.skip=true
 docker build -t armbian-sysinfo:latest .
 docker rm -f armbian-sysinfo
