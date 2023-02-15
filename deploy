@@ -1,0 +1,7 @@
+#!/usr/bin/zsh
+git checkout main
+git pull origin/main
+mvn package -Dmaven.test.skip=true
+docker build -t armbian-sysinfo:latest .
+docker rm -f armbian-sysinfo
+docker run -d --name simple-server -p 27100:8080 --restart=always armbian-sysinfo
